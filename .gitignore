@@ -1,0 +1,7 @@
+.env
+.venv
+__pycache__
+data/samples
+data/certs/*
+data/temp/*
+data/output/*
