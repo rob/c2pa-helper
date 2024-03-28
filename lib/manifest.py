@@ -1,7 +1,13 @@
-import os
 import json
-from typing import Optional, Dict, List
-from lib.assertions import get_author_assertion, get_c2pa_published_assertion, get_exif_datetime_original_assertion, get_exif_gps_assertion, get_training_mining_assertion, get_exif_make_model_assertion, get_c2pa_created_assertion
+import os
+from typing import Dict, List, Optional
+
+from lib.assertions import (get_author_assertion, get_c2pa_created_assertion,
+                            get_c2pa_published_assertion,
+                            get_exif_datetime_original_assertion,
+                            get_exif_gps_assertion,
+                            get_exif_make_model_assertion,
+                            get_training_mining_assertion)
 from lib.image import get_image_metadata, get_mime_type, get_title
 
 

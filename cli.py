@@ -1,23 +1,26 @@
-from dotenv import load_dotenv
-import os
 import argparse
+import os
+
+from dotenv import load_dotenv
+
 from lib.c2pa import sign_file
 
-load_dotenv()
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Sign a media file with content credentials.')
+    load_dotenv()
+
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description='Sign a media file with content credentials.')
 
     parser.add_argument('media_path', type=str, help='Path to the media file to be signed')
 
     parser.add_argument('output_path', type=str, help='Output path for the signed media file')
 
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
-    media_path = args.media_path
-    output_path = args.output_path
+    media_path: str = args.media_path
+    output_path: str = args.output_path
 
-    data_path = os.path.join(
+    data_path: str = os.path.join(
         os.path.dirname(__file__),
         'data',
         'temp')

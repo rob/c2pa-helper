@@ -1,4 +1,5 @@
 import os
+
 import c2pa
 from lib.manifest import get_manifest
 
