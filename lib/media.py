@@ -4,7 +4,7 @@ from typing import Optional
 import exiftool
 
 
-def get_image_metadata(media_path: str) -> Optional[dict]:
+def get_media_metadata(media_path: str) -> Optional[dict]:
     metadata_values = {}
 
     with exiftool.ExifToolHelper() as et:
@@ -22,7 +22,7 @@ def get_image_metadata(media_path: str) -> Optional[dict]:
 
 def get_mime_type(media_path: str) -> Optional[str]:
     mime_types = {
-        # 'avi': "video/msvideo",
+        'avi': "video/msvideo",
         'avif': "image/avif",
         # 'c2pa': "application/x-c2pa-manifest-store",
         'dng': "image/x-adobe-dng",
@@ -49,8 +49,13 @@ def get_mime_type(media_path: str) -> Optional[str]:
     return mime_types.get(ext, None)
 
 
-def get_title(media_path: str, metadata: dict) -> str:
-    if 'XMP:Title' in metadata:
-        return metadata['XMP:Title']
+def get_media_type(mime_type: Optional[str]) -> Optional[str]:
+    if mime_type is None:
+        return None
 
-    return os.path.basename(media_path)
+    if mime_type.startswith("image/"):
+        return "image"
+    elif mime_type.startswith("video/"):
+        return "video"
+
+    return None

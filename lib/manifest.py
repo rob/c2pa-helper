@@ -8,7 +8,7 @@ from lib.assertions import (get_author_assertion, get_c2pa_created_assertion,
                             get_exif_gps_assertion,
                             get_exif_make_model_assertion,
                             get_training_mining_assertion)
-from lib.image import get_image_metadata, get_mime_type, get_title
+from lib.media import get_media_metadata, get_mime_type
 
 
 def generate_manifest(media_path: str) -> Optional[str]:
@@ -17,13 +17,13 @@ def generate_manifest(media_path: str) -> Optional[str]:
     if not mime_type:
         raise RuntimeError("The mime type could not be determined.")
 
-    image_metadata: Optional[Dict] = get_image_metadata(media_path)
+    image_metadata: Optional[Dict] = get_media_metadata(media_path)
 
     if not image_metadata:
         raise RuntimeError("The image metadata could not be retrieved.")
 
     manifest: Dict = {
-        "title": get_title(media_path, image_metadata),
+        "title": _get_title(media_path, image_metadata),
         "format": mime_type
     }
 
@@ -51,3 +51,10 @@ def generate_manifest(media_path: str) -> Optional[str]:
         manifest['claim_generator'] = claim_generator
 
     return json.dumps(manifest)
+
+
+def _get_title(media_path: str, metadata: dict) -> str:
+    if 'XMP:Title' in metadata:
+        return metadata['XMP:Title']
+
+    return os.path.basename(media_path)
