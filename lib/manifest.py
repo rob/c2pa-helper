@@ -11,7 +11,7 @@ from lib.assertions import (get_author_assertion, get_c2pa_created_assertion,
 from lib.image import get_image_metadata, get_mime_type, get_title
 
 
-def get_manifest(media_path: str) -> Optional[str]:
+def generate_manifest(media_path: str) -> Optional[str]:
     mime_type: Optional[str] = get_mime_type(media_path)
 
     if not mime_type:
@@ -21,6 +21,11 @@ def get_manifest(media_path: str) -> Optional[str]:
 
     if not image_metadata:
         raise RuntimeError("The image metadata could not be retrieved.")
+
+    manifest: Dict = {
+        "title": get_title(media_path, image_metadata),
+        "format": mime_type
+    }
 
     potential_assertions: List[Optional[Dict]] = [
         get_training_mining_assertion(),
@@ -38,16 +43,11 @@ def get_manifest(media_path: str) -> Optional[str]:
     if not valid_assertions:
         raise RuntimeError("No valid assertions could be generated.")
 
-    manifest: Dict = {
-        "title": get_title(media_path, image_metadata),
-        "format": mime_type
-    }
+    manifest['assertions'] = valid_assertions
 
     claim_generator: Optional[str] = os.environ.get('CLAIM_GENERATOR')
 
     if claim_generator:
         manifest['claim_generator'] = claim_generator
-
-    manifest['assertions'] = valid_assertions
 
     return json.dumps(manifest)

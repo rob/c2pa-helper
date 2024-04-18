@@ -1,15 +1,16 @@
 import os
 
 import c2pa
-from lib.manifest import get_manifest
+from config import get_cert_path, get_cert_type, get_private_key_path
+from lib.manifest import generate_manifest
 
 
-def sign_file(media_path: str, output_path: str, data_path) -> None:
-    cert_path = os.environ.get('CERT_KEY')
+def sign_file(media_path: str, output_path: str) -> None:
+    cert_path = get_cert_path()
     if not cert_path or not os.path.exists(cert_path):
         raise FileNotFoundError("Certificate path not found or not provided.")
 
-    private_key_path = os.environ.get('CERT_PRIVATE_KEY')
+    private_key_path = get_private_key_path()
     if not private_key_path or not os.path.exists(private_key_path):
         raise FileNotFoundError("Private key path not found or not provided.")
 
@@ -19,16 +20,19 @@ def sign_file(media_path: str, output_path: str, data_path) -> None:
 
     output_path = os.path.normpath(output_path)
 
-    certs = open(os.path.normpath(cert_path), "rb").read()
-    prv_key = open(os.path.normpath(private_key_path), "rb").read()
+    with open(os.path.normpath(cert_path), "rb") as cert_file:
+        certs: bytes = cert_file.read()
+
+    with open(os.path.normpath(private_key_path), "rb") as key_file:
+        prv_key: bytes = key_file.read()
 
     cert_timestamp_url = os.environ.get('CERT_TIMESTAMP_URL', "https://timestamp.digicert.com")
 
-    signer = c2pa.SignerInfo("ps256", certs, prv_key, cert_timestamp_url)
+    signer = c2pa.SignerInfo(get_cert_type(), certs, prv_key, cert_timestamp_url)
 
-    manifest = get_manifest(media_path)
+    manifest = generate_manifest(media_path)
 
     if not manifest:
         raise RuntimeError("Manifest not found or not provided.")
 
-    c2pa.sign_file(media_path, output_path, manifest, signer, data_path)
+    c2pa.sign_file(media_path, output_path, manifest, signer, None)
