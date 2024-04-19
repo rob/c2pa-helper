@@ -9,9 +9,9 @@ This script helps extract common metadata from a media asset (e.g., EXIF, IPTC, 
 Once the media asset is signed, end users can use tools like the C2PA's [Verify tool](https://opensource.contentauthenticity.org/docs/verify) to upload the media asset and view its signed credentials.
 
 > [!IMPORTANT]
-> **This script was created to be modified to fit your individual needs. It includes support for the metadata below and assumes certain things — like your media asset never being signed before (see [Limitations](#limitations)).**
+> **This script was designed to be modified to fit your individual needs. It includes support for the metadata below and assumes certain things — like your media asset never being signed before (see [Limitations](#limitations)).**
 >
-> **For example, you might need to support custom IPTC fields not handled below, or remove the GPS data assertion from being included for privacy reasons.**
+> **For example, you might need to support custom IPTC fields not handled below, or want to remove the GPS data assertion from being included for privacy reasons.**
 >
 > **The code is easy to understand and modify and you are encouraged to extend it unless you are fine with the defaults it produces.**
 >
@@ -61,6 +61,8 @@ Everything in this file is optional; feel free to remove anything you don't need
 > If you don't have your own [certificate](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests), remove all of the `CERT` variables and the tool will use the built-in certificate found in `certs/sample`. This certificate is pulled directly from the [C2PA repository](https://github.com/contentauth/c2patool/tree/main/sample).
 
 ## Limitations
+
+### `c2pa.published` action
 
 Right now, this script assumes you are generating a manifest and signing a media asset for the first time, so everything signed gets the [c2pa.published](https://c2pa.org/specifications/specifications/1.3/specs/C2PA_Specification.html#_actions) action included in its manifest.
 
