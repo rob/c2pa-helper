@@ -1,38 +1,56 @@
 # c2pa-helper
 
-A Python helper script for generating [C2PA](https://opensource.contentauthenticity.org/) [manifests](https://opensource.contentauthenticity.org/docs/manifest/understanding-manifest) and attaching them to media assets.
+This Python script is a small wrapper around the [sign_file](https://github.com/contentauth/c2pa-python?tab=readme-ov-file#add-a-signed-manifest-to-a-media-file) function from the [c2pa-python](https://github.com/contentauth/c2pa-python) library that helps generate the [manifest](https://opensource.contentauthenticity.org/docs/manifest/manifest-ref/#manifest) JSON necessary before [signing and attaching](https://opensource.contentauthenticity.org/docs/c2pa-python/#add-a-signed-manifest-to-a-media-file) the manifest to a media file.
+
+### More information
+
+- [Coalition for Content Provenance and Authenticity (C2PA)](https://c2pa.org/)
+- [Content Authenticity Initiative (CAI)](https://contentauthenticity.org/)
+- [Open-source tools for content authenticity and provenance](https://opensource.contentauthenticity.org/)
+- [Working with manifests](https://opensource.contentauthenticity.org/docs/manifest/understanding-manifest)
+- [Manifest store reference](https://opensource.contentauthenticity.org/docs/manifest/manifest-ref)
+- [Signing manifests](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests)
 
 ## Overview
 
-This script helps extract common metadata from a media asset (e.g., EXIF, IPTC, and XMP) and generate the proper C2PA [assertions and actions](https://opensource.contentauthenticity.org/docs/manifest/assertions-actions) to be included in the [manifest](https://opensource.contentauthenticity.org/docs/manifest/understanding-manifest). It then takes this generated manifest and [signs](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests) the media asset with it, optionally using your own [certificate](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests#example).
+This script extracts metadata from a media file (e.g., EXIF, IPTC, and XMP) and generates the [manifest](https://opensource.contentauthenticity.org/docs/manifest/manifest-ref/#manifest) JSON with C2PA's [assertions and actions](https://opensource.contentauthenticity.org/docs/manifest/assertions-actions). It uses this generated manifest JSON to [sign](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests) and [attach](https://opensource.contentauthenticity.org/docs/c2pa-python/#add-a-signed-manifest-to-a-media-file) the manifest to a media file, optionally using your own [certificate](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests#example).
 
-Once the media asset is signed, end users can use tools like the C2PA's [Verify tool](https://opensource.contentauthenticity.org/docs/verify) to upload the media asset and view its signed credentials.
+Once the media file is signed, end users can use something like the C2PA's online [Verify tool](https://opensource.contentauthenticity.org/docs/verify) to upload the media file and view its signed content credentials (i.e., the manifests.) There's also a command line tool called [c2patool](https://opensource.contentauthenticity.org/docs/c2patool/) available.
 
 > [!IMPORTANT]
-> **This script was designed to be modified to fit your individual needs. It includes support for the metadata below and assumes certain things — like your media asset never being signed before (see [Limitations](#limitations)).**
+> **This script was designed to be modified to fit your individual needs. It includes support for the metadata below and assumes certain things — like your media file never being signed before (see [Considerations](#considerations)).**
 >
-> **For example, you might need to support custom IPTC fields not handled below, or want to remove the GPS data assertion from being included for privacy reasons.**
+> **For example, you might need to support custom IPTC fields not handled below, change the order in how you search for the "author" field, or want to remove the GPS data assertion from being included for privacy reasons.**
 >
-> **The code is easy to understand and modify and you are encouraged to extend it unless you are fine with the defaults it produces.**
->
-> **Out of the box, it handles a lot of the actions, assertions, and organizational information (such as website and social networks) that are specifically displayed on the C2PA [Verify tool](https://contentcredentials.org/verify) website when trying to validate content credentials found inside a media asset.**
+> **Out of the box, this script handles a lot of the actions, assertions, and organizational information (i.e., website and social networks) that are displayed on the C2PA's online [Verify tool](https://opensource.contentauthenticity.org/docs/verify) when uploading and validating content credentials found inside a media file.**
 
-### Metadata
+### Metadata included
 
-If any of the following metadata is found in the media asset, it's included in the generated manifest:
+If any of the following metadata is found in the media file, it's included in the generated manifest:
 
-- **Title**, by looking at the `XMP:Title` field (otherwise, it defaults to the filename itself)
-- **Author**, by looking for `'EXIF:Artist'`, `'XMP:Creator'`, or `'XMP:Credit'` fields (in that order, whichever comes first)
-- **Camera make and model**, by looking for `EXIF:Make` or `EXIF:Model`
-- **GPS information**, by looking at the numerous `EXIF:GPS*` fields
-- **Original date and time**, by looking at the `EXIF:DateTimeOriginal` field
+| Metadata                   | Description                                                             |
+|-------------------------|-------------------------------------------------------------------------|
+| **Title**               | Extracted from `XMP:Title` <br> (or defaults to filename)       |
+| **Author**              | First occurance of `EXIF:Artist`, `XMP:Creator`, or `XMP:Credit` <br>(in that order) |
+| **Camera make and model** | Extracted from `EXIF:Make` and `EXIF:Model`                                    |
+| **GPS information**     | Extracted from `EXIF:GPS*` fields                                        |
+| **Original date and time** | Extracted from `EXIF:DateTimeOriginal`                        |
 
-In addition to metadata like the EXIF, IPTC, and XMP fields above, this tool also includes other information in the manifest:
+### Extra metadata included
 
-- Your organization's [website, Instagram page, and LinkedIn page](https://opensource.contentauthenticity.org/docs/verify#credit-and-usage) (shown in the [Verify tool](https://contentcredentials.org/verify); edited in the `.env` file)
-- [Do not train](https://opensource.contentauthenticity.org/docs/manifest/assertions-actions#do-not-train-assertion) assertions, to specify the media asset shouldn't be used for data mining, machine learning (ML) training, or inference purposes.
+In addition to the above, the following is also included in the manifest:
+
+- Assertions for your organization's [website, Instagram page, and LinkedIn page](https://opensource.contentauthenticity.org/docs/verify#credit-and-usage) (shown in the [Verify tool](https://contentcredentials.org/verify))
+  - These values are edited in your `.env` file (see [Configuration](#configuration))
+- [Do not train](https://opensource.contentauthenticity.org/docs/manifest/assertions-actions#do-not-train-assertion) assertions, to specify the media file shouldn't be used for data mining, machine learning (ML) training, or inference purposes
 
 ## Installation
+
+### Dependencies
+
+- [c2pa-python](https://github.com/contentauth/c2pa-python)
+- [PyExifTool](https://github.com/sylikc/pyexiftool)
+- [python-dotenv](https://github.com/theskumar/python-dotenv)
 
 > [!NOTE]
 > Depending on your OS and environment, you may need to modify some of these commands.
@@ -45,25 +63,59 @@ source .venv/bin/activate && \
 pip install -r requirements.txt
 ```
 
-### Dependencies
-
-- [c2pa-python](https://github.com/contentauth/c2pa-python)
-- [PyExifTool](https://github.com/sylikc/pyexiftool)
-- [python-dotenv](https://github.com/theskumar/python-dotenv)
-
 ## Configuration
 
-Copy `.env.sample` to `.env` and modify the values to fit your needs.
+Copy `.env.sample` to `.env` and modify the variable values.
 
-Everything in this file is optional; feel free to remove anything you don't need.
+> [!NOTE]
+> All of the variables found in `.env` are optional — remove any that you don't need.
+
+| Variable            | Description |
+|---------------------|-------------|
+| `CLAIM_GENERATOR`   | Specifies the generator of the claim (e.g., "org-name/0.1.0") ([docs](https://opensource.contentauthenticity.org/docs/verify/#app-or-device-used)) |
+| `CERT_TYPE`         | The type of certificate, e.g., "ps256" ([docs](https://opensource.contentauthenticity.org/docs/c2patool/x_509/)) |
+| `CERT`              | Path to the certificate file ([docs](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests)) |
+| `CERT_PRIVATE_KEY`  | Path to the certificate's private key file ([docs](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests)) |
+| `CERT_TIMESTAMP_URL`| URL for the certificate timestamping service ([docs](https://opensource.contentauthenticity.org/docs/manifest/understanding-manifest/#time-stamps))<br>(You shouldn't need to modify this in most cases.) |
+| `ORGANIZATION_URL`  | The URL of the organization's homepage ([docs](https://opensource.contentauthenticity.org/docs/verify/#produced-by)) |
+| `LINKEDIN_NAME`     | The name of the organization on LinkedIn ([docs](https://opensource.contentauthenticity.org/docs/verify/#social-media-accounts)) |
+| `LINKEDIN_URL`      | URL to the organization's LinkedIn page ([docs](https://opensource.contentauthenticity.org/docs/verify/#social-media-accounts)) |
+| `INSTAGRAM_NAME`    | The organization's Instagram username ([docs](https://opensource.contentauthenticity.org/docs/verify/#social-media-accounts)) |
+| `INSTAGRAM_URL`     | URL to the organization's Instagram page ([docs](https://opensource.contentauthenticity.org/docs/verify/#social-media-accounts)) |
 
 > [!IMPORTANT]
-> If you don't have your own [certificate](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests), remove all of the `CERT` variables and the tool will use the built-in certificate found in `certs/sample`. This certificate is pulled directly from the [C2PA repository](https://github.com/contentauth/c2patool/tree/main/sample).
+> If you don't have your own [certificate](https://opensource.contentauthenticity.org/docs/manifest/signing-manifests), remove all of the `CERT` variables and `sign_file` will use the built-in certificate found in `certs/sample`. This certificate is pulled directly from the [C2PA repository](https://github.com/contentauth/c2patool/tree/main/sample) and will show as "C2PA Test Signing Cert" in the C2PA's online [Verify tool](https://opensource.contentauthenticity.org/docs/verify).
 
-## Limitations
+## Modifying
+
+Assertions are functions stored in `lib/assertions.py` that return a `Dict` if they're valid.
+
+Return `None` if the assertion isn't valid (e.g., you're looking for the `EXIF:DateTimeOriginal` field but it isn't found in the metadata.)
+
+Actions work the same exact way, but are stored in `lib/actions.py`.
+
+You can modify these assertions and actions or add new ones in both of these files.
+
+These assertions and actions are called from `lib/manifest.py` in the `potential_assertions_actions` `List` in the order you specify. They're only included in the final manifest JSON if they return a `Dict` (i.e., not `None`.)
+
+## Usage
+
+Assuming your `.env` is set up and the `potential_assertions_actions` `List` in `lib/manifest.py` contains all of the actions and assertions you want to include, you can run the script via `cli.py` (for a single file, one-time use) or `batch.py` (to batch process multiple files inside a directory.)
+
+### cli.py
+
+`python cli.py /path/to/original_file /path/to/signed_file`
+
+### batch.py
+
+[...]
+
+## Considerations
 
 ### `c2pa.published` action
 
-Right now, this script assumes you are generating a manifest and signing a media asset for the first time, so everything signed gets the [c2pa.published](https://c2pa.org/specifications/specifications/1.3/specs/C2PA_Specification.html#_actions) action included in its manifest.
+Right now, this script assumes you are generating a manifest and signing a media file for the first time, so everything signed gets the [c2pa.published](https://c2pa.org/specifications/specifications/1.3/specs/C2PA_Specification.html#_actions) action included in its manifest.
 
-This might not make sense if you're trying to re-sign a media asset after making changes to it and have already signed it previously. For example, you might want to use `c2pa.resized`, `c2pa.filtered`, or `c2pa.color_adjustments` instead.
+This might not make sense if you're trying to re-sign a media file after making changes to it and have already signed it previously. You would want to use a different action, most likely.
+
+For example, you might want to use `c2pa.resized`, `c2pa.filtered`, or `c2pa.color_adjustments` instead.
