@@ -2,8 +2,7 @@ import json
 import os
 from typing import Dict, List, Optional
 
-from lib.actions import get_c2pa_published_action
-from lib.assertions import (get_author_assertion,
+from lib.assertions import (get_author_assertion, get_c2pa_published_assertion,
                             get_exif_datetime_original_assertion,
                             get_exif_gps_assertion,
                             get_exif_make_model_assertion,
@@ -27,29 +26,29 @@ def generate_manifest(media_path: str) -> Optional[str]:
         "format": mime_type
     }
 
-    potential_assertions_actions: List[Optional[Dict]] = [
+    claim_generator: Optional[str] = os.environ.get('CLAIM_GENERATOR')
+
+    if claim_generator:
+        manifest['claim_generator'] = claim_generator
+
+    potential_assertions: List[Optional[Dict]] = [
         get_training_mining_assertion(),
-        # get_c2pa_created_action(image_metadata, type='minorHumanEdits'),
-        get_c2pa_published_action(),
+        # get_c2pa_created_assertion(image_metadata, type='minorHumanEdits'),
+        get_c2pa_published_assertion(),
         get_author_assertion(image_metadata),
         get_exif_make_model_assertion(image_metadata),
         get_exif_gps_assertion(image_metadata),
         get_exif_datetime_original_assertion(image_metadata)
     ]
 
-    valid_assertions_actions: List[Dict] = [assertion_or_action
-                                            for assertion_or_action in potential_assertions_actions
-                                            if isinstance(assertion_or_action, dict)]
+    valid_assertions: List[Dict] = [assertion
+                                    for assertion in potential_assertions
+                                    if isinstance(assertion, dict)]
 
-    if not valid_assertions_actions:
+    if not valid_assertions:
         raise RuntimeError("No valid assertions could be generated.")
 
-    manifest['assertions'] = valid_assertions_actions
-
-    claim_generator: Optional[str] = os.environ.get('CLAIM_GENERATOR')
-
-    if claim_generator:
-        manifest['claim_generator'] = claim_generator
+    manifest['assertions'] = valid_assertions
 
     return json.dumps(manifest)
 
