@@ -17,11 +17,12 @@ This script extracts metadata from a media file (e.g., EXIF, IPTC, and XMP) and 
 
 Once the media file is signed, end users can use something like the C2PA's online [Verify tool](https://opensource.contentauthenticity.org/docs/verify) to upload the media file and view its signed content credentials (i.e., the manifests.) There's also a command line tool called [c2patool](https://opensource.contentauthenticity.org/docs/c2patool/) available.
 
-> [!IMPORTANT] > **This script was designed to be modified to fit your individual needs. It includes support for the metadata below and assumes certain things — like your media file never being signed before (see [Considerations](#considerations)).**
+> [!IMPORTANT]
+> This script was designed to be modified to fit your individual needs. It includes support for the metadata below and assumes certain things — like your media file never being signed before (see [Considerations](#considerations)).
 >
-> **For example, you might need to support custom IPTC fields not handled below, change the order in how you search for the "author" field, or want to remove the GPS data assertion from being included for privacy reasons.**
+> For example, you might need to support custom IPTC fields not handled below, change the order in how you search for the "author" field, or want to remove the GPS data assertion from being included for privacy reasons.
 >
-> **Out of the box, this script handles a lot of the actions, assertions, and organizational information (i.e., website and social networks) that are displayed on the C2PA's online [Verify tool](https://opensource.contentauthenticity.org/docs/verify) when uploading and validating content credentials found inside a media file.**
+> Out of the box, this script handles a lot of the actions, assertions, and organizational information (i.e., website and social networks) that are displayed on the C2PA's online [Verify tool](https://opensource.contentauthenticity.org/docs/verify) when uploading and validating content credentials found inside a media file.
 
 ### Metadata included
 
