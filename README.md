@@ -96,7 +96,7 @@ These assertion functions are called from `lib/manifest.py` in the `potential_as
 
 ## Usage
 
-Assuming your `.env` is set up and the `potential_assertions` `List` in `lib/manifest.py` contains all of the actions and assertions you want to include, you can run the script via `cli.py` (for a single file) or `batch.py` (to batch process multiple files inside a directory.)
+Assuming your `.env` is set up and the `potential_assertions` `List` in `lib/manifest.py` contains all of the assertions you want to include, you can run the script via `cli.py` (for a single file) or `batch.py` (to batch process multiple files inside a directory.)
 
 ### cli.py
 
